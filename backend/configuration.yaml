@@ -1,0 +1,31 @@
+service:
+  name: "chat"
+  httpPort: ":2222"
+  grpcPort: ":2223"
+  metricPort: 3333
+  debug: false
+  traceCollectorURL: ""
+  env: "dev"
+database:
+  host: "localhost"
+  maxIdle: 10
+  maxOpen: 20
+  maxIdletime: "1m"
+  maxLifetime: "3m"
+  name: "chat"
+  password: "123456"
+  port: "3306"
+  user: "root"
+  location: "Local"
+redis:
+  address: "localhost:6379"
+  password: ""
+  index: 0
+github:
+    clientID: "Ov23liN3txmpaXT9Kw4W"
+    clientSecret: ""
+jwt:
+  accessTokenSecretKey: "pW01vkr0Mmm9q15Iep/Aeg=="
+  refreshTokenSecretKey: "oW01vkr0Mmm9q15Iep/Aeg=="
+  accessTokenDuration: "360h"
+  refreshTokenDuration: "360h"
