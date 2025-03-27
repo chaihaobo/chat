@@ -15,7 +15,9 @@ type (
 		Lock(ctx context.Context) error
 		Unlock(ctx context.Context) error
 	}
+
 	Client interface {
+		Raw() *redis.Client
 		Ping(ctx context.Context) error
 		Set(ctx context.Context, key string, value interface{}, opts ...Option) error
 		Get(ctx context.Context, key string, result interface{}) error
@@ -33,6 +35,10 @@ type (
 		mutex *redsync.Mutex
 	}
 )
+
+func (c *client) Raw() *redis.Client {
+	return c.db
+}
 
 func (c *client) Close() error {
 	return c.db.Close()

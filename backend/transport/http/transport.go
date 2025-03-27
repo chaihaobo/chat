@@ -60,6 +60,8 @@ func (t *transport) applyRoutes() {
 	{
 		userGroup.POST("/login", restkit.AdaptToGinHandler(restkit.HandlerFunc[*user.LoginResponse](userController.Login)))
 		userGroup.POST("/login/password", restkit.AdaptToGinHandler(restkit.HandlerFunc[*user.LoginResponse](userController.LoginByPassword)))
+		userGroup.GET("/friends", restkit.AdaptToGinHandler(restkit.HandlerFunc[user.Users](userController.GetUserFriends)))
+		userGroup.GET("/info", restkit.AdaptToGinHandler(restkit.HandlerFunc[*user.User](userController.GetUserInfo)))
 	}
 
 }

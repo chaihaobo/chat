@@ -98,7 +98,9 @@ func New(res resource.Resource) (Client, error) {
 		MaxIdleTime: int(dbConfig.MaxIdleTime.Minutes()),
 		Location:    dbConfig.Location,
 		ParseTime:   true,
-	}, nil)
+	}, &gorm.Config{
+		Logger: mysql.NewGormLogger(res.Logger()),
+	})
 	if err != nil {
 		return nil, err
 	}

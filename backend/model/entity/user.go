@@ -18,6 +18,8 @@ func (User) TableName() string {
 
 func (u User) ToJWTClaims() *jwt.UserForToken {
 	return &jwt.UserForToken{
-		ID: u.ID,
+		ID:       u.ID,
+		UserName: u.Username,
+		Avatar:   u.Avatar,
 	}
 }

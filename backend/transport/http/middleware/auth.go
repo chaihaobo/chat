@@ -62,6 +62,8 @@ func AuthMiddleware(res resource.Resource, app application.Application) gin.Hand
 			return
 		}
 		ctx := context.WithValue(gctx.Request.Context(), constant.ContextKeyUserID, userClaims.ID)
+		ctx = context.WithValue(ctx, constant.ContextKeyUserName, userClaims.UserName)
+		ctx = context.WithValue(ctx, constant.ContextKeyUserAvatar, userClaims.Avatar)
 		gctx.Request = gctx.Request.WithContext(ctx)
 		gctx.Next()
 	}

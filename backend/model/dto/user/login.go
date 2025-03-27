@@ -13,6 +13,7 @@ type (
 	LoginResponse struct {
 		ID           uint64 `json:"id"`
 		Avatar       string `json:"avatar"`
+		UserName     string `json:"username"`
 		AccessToken  string `json:"access_token"`
 		RefreshToken string `json:"refresh_token"`
 	}

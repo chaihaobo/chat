@@ -9,9 +9,9 @@ import (
 type (
 	Users []*User
 	User  struct {
-		ID       uint64 `json:"id"`
-		UserName string `json:"username"`
-		Avatar   string `json:"avatar"`
+		ID       uint64 `json:"id" mapstructure:"id"`
+		UserName string `json:"username" mapstructure:"username"`
+		Avatar   string `json:"avatar" mapstructure:"avatar"`
 	}
 )
 
@@ -23,4 +23,12 @@ func NewUsers(users []*entity.User) Users {
 			Avatar:   item.Avatar,
 		}
 	})
+}
+
+func NewUser(user *entity.User) *User {
+	return &User{
+		ID:       user.ID,
+		UserName: user.Username,
+		Avatar:   user.Avatar,
+	}
 }

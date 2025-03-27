@@ -20,6 +20,7 @@ func NewRoot() core.Cmder {
 	return core.CmderFunc(func(ctx *core.Context) *cobra.Command {
 		rootCmd.AddCommand(NewHTTP().Command(ctx))
 		rootCmd.AddCommand(NewMockToken().Command(ctx))
+		rootCmd.AddCommand(NewSubscriber().Command(ctx))
 		rootCmd.Run = func(cmd *cobra.Command, args []string) {
 			listenRoot(ctx)
 		}

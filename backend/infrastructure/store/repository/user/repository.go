@@ -16,20 +16,33 @@ type (
 		GetByGithubUserID(ctx context.Context, githubUserID string) (*entity.User, error)
 		Save(ctx context.Context, user *entity.User) error
 		GetFriends(ctx context.Context, userID uint64) ([]*entity.User, error)
+		GetByID(ctx context.Context, id uint64) (*entity.User, error)
 	}
 	repository struct {
 		client client.Client
 	}
 )
 
+func (r repository) GetByID(ctx context.Context, id uint64) (*entity.User, error) {
+	var data entity.User
+	err := r.client.DB(ctx).Where("id = ?", id).Last(&data).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return &data, nil
+}
+
 func (r repository) GetFriends(ctx context.Context, userID uint64) ([]*entity.User, error) {
 	sql := `
 select t2.* from friend t1
-left join user t2 on t1.to_user_id = t2.id
+inner join user t2 on t1.to_user_id = t2.id
 where t1.user_id = ?;
 `
 	result := make([]*entity.User, 0)
-	if err := r.client.DB(ctx).Raw(sql, userID).Find(&result).Error; err != nil {
+	if err := r.client.DB(ctx).Raw(sql, userID).Scan(&result).Error; err != nil {
 		return nil, err
 	}
 	return result, nil

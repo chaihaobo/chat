@@ -21,6 +21,7 @@ type (
 		Login(ctx context.Context, request *userdto.LoginRequest) (*userdto.LoginResponse, error)
 		LoginByPassword(ctx context.Context, request *userdto.LoginByPasswordRequest) (*userdto.LoginResponse, error)
 		GetUserFriends(ctx context.Context) (userdto.Users, error)
+		GetUserInfo(ctx context.Context) (*userdto.User, error)
 		TokenManger() jwt.TokenManager
 	}
 
@@ -32,6 +33,16 @@ type (
 		oauthProvider goth.Provider
 	}
 )
+
+func (s *service) GetUserInfo(ctx context.Context) (*userdto.User, error) {
+	userID := tools.ContextUserID(ctx)
+	user, err := s.infra.Store().Repository().User().GetByID(ctx, userID)
+	if err != nil {
+		s.res.Logger().Error(ctx, "failed to get user by id", err)
+		return nil, constant.ErrSystemMalfunction
+	}
+	return userdto.NewUser(user), nil
+}
 
 func (s *service) GetUserFriends(ctx context.Context) (userdto.Users, error) {
 	userID := tools.ContextUserID(ctx)

@@ -37,7 +37,9 @@ type TokenManager interface {
 
 // UserForToken is bridge for bussinessUser to authUser
 type UserForToken struct {
-	ID uint64 `json:"id"`
+	ID       uint64 `json:"id"`
+	UserName string `json:"username"`
+	Avatar   string `json:"avatar"`
 }
 
 // CustomClaims is a custom JWT claims that contains some user's information

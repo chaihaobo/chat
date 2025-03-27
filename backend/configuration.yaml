@@ -23,7 +23,7 @@ redis:
   index: 0
 github:
     clientID: "Ov23liN3txmpaXT9Kw4W"
-    clientSecret: ""
+    clientSecret: "dba41c865f9d6165c4d97b5b3cd4bf2b005f4fd9"
 jwt:
   accessTokenSecretKey: "pW01vkr0Mmm9q15Iep/Aeg=="
   refreshTokenSecretKey: "oW01vkr0Mmm9q15Iep/Aeg=="

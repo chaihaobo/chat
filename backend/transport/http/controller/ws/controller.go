@@ -34,7 +34,7 @@ func (c controller) Accept(ctx *gin.Context) {
 		restkit.HTTPWriteErr(ctx.Writer, constant.ErrSystemMalfunction)
 		return
 	}
-	c.app.Ws().AcceptWsConnection(ctx, wsConnection)
+	c.app.Ws().AcceptWsConnection(ctx.Request.Context(), wsConnection)
 
 }
 

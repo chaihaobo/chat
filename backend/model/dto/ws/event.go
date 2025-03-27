@@ -1,5 +1,7 @@
 package ws
 
+import userdto "github.com/chaihaobo/chat/model/dto/user"
+
 // EventSendMessage 发送消息
 // EventReceiveMessage  接收消息
 const (
@@ -13,8 +15,8 @@ type (
 		Content string `json:"content" mapstructure:"content"`
 	}
 	MessageReceive struct {
-		From    uint64 `json:"from" mapstructure:"from"`
-		Content string `json:"content" mapstructure:"content"`
+		From    *userdto.User `json:"from" mapstructure:"from"`
+		Content string        `json:"content" mapstructure:"content"`
 	}
 )
 

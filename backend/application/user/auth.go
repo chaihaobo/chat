@@ -76,6 +76,7 @@ func (s *service) generateLoginResponse(ctx context.Context, userEntity *entity.
 	return &user.LoginResponse{
 		ID:           userEntity.ID,
 		Avatar:       userEntity.Avatar,
+		UserName:     userEntity.Username,
 		AccessToken:  lo.Must(s.tokenManger.GenerateAccessToken(ctx, jwtClaims)),
 		RefreshToken: lo.Must(s.tokenManger.GenerateRefreshToken(ctx, jwtClaims)),
 	}
