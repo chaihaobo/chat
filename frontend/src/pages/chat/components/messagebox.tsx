@@ -1,6 +1,7 @@
 import {FC} from "react";
 import {Avatar} from "antd";
 import styled from "styled-components";
+import useUserInfo from "../../../hooks/useUserInfo.ts";
 
 export interface MessageBoxProps {
     items: MessageBoxItem[]
@@ -15,14 +16,15 @@ export interface MessageBoxItem {
 }
 
 const Messagebox: FC<MessageBoxProps> = ({items, className}) => {
+    let {userInfo} = useUserInfo();
     return (
         <div className={className}>
             {items.map((item, index) => (
-                <div 
-                    key={index} 
-                    className={`message-item ${item.senderID === 0 ? 'message-self' : ''}`}
+                <div
+                    key={index}
+                    className={`message-item ${item.senderID === userInfo?.id ? 'message-self' : ''}`}
                 >
-                    <Avatar src={item.senderAvatar} className="avatar" />
+                    <Avatar src={item.senderAvatar} className="avatar"/>
                     <div className="message-content">
                         <div className="sender-name">{item.senderName}</div>
                         <div className="message-bubble">{item.content}</div>
@@ -45,7 +47,7 @@ export default styled(Messagebox)`
 
         &.message-self {
             flex-direction: row-reverse;
-            
+
             .message-content {
                 align-items: flex-end;
             }
@@ -77,7 +79,7 @@ export default styled(Messagebox)`
         background-color: #f5f5f5;
         padding: 8px 12px;
         border-radius: 2px 8px 8px 8px;
-        max-width: 60%;
+        max-width: 560px;
         word-wrap: break-word;
     }
 `;

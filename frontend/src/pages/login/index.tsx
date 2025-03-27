@@ -13,9 +13,10 @@ const Login: FC<{ className?: string }> = ({className}) => {
     const navigate = useNavigate();
     const [messageApi, contextHolder] = message.useMessage();
     const {setUserInfo} = useUserInfo();
+    const source = new URLSearchParams(window.location.search).get('source');
 
     const handleGithubLogin = () => {
-        const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${GITHUB_REDIRECT_URI}&scope=user`;
+        const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${GITHUB_REDIRECT_URI + '?source=' + source}&scope=user`;
         window.location.href = githubAuthUrl;
     };
 
@@ -24,11 +25,12 @@ const Login: FC<{ className?: string }> = ({className}) => {
             const userInfo = await loginWithPassword(values);
             setUserInfo(userInfo);
             messageApi.success('登录成功');
-            navigate('/chat');
+            navigate(source ?? '/chat');
         } catch (error) {
             messageApi.error('登录失败，请检查用户名和密码');
         }
     };
+
 
     return (
         <div className={className}>

@@ -1,7 +1,9 @@
 import { FC, useState } from "react";
-import { Input, Button } from "antd";
-import { SendOutlined } from "@ant-design/icons";
+import { Input, Button, Popover } from "antd";
+import { SendOutlined, SmileOutlined } from "@ant-design/icons";
 import styled from "styled-components";
+import data from '@emoji-mart/data';
+import Picker from '@emoji-mart/react';
 
 interface ChatInputProps {
     className?: string;
@@ -10,6 +12,10 @@ interface ChatInputProps {
 
 const ChatInput: FC<ChatInputProps> = ({ className, onSendMessage }) => {
     const [message, setMessage] = useState("");
+    
+    const handleEmojiSelect = (emoji: any) => {
+        setMessage(prev => prev + emoji.native);
+    };
 
     const handleSend = () => {
         if (message.trim()) {
@@ -34,6 +40,24 @@ const ChatInput: FC<ChatInputProps> = ({ className, onSendMessage }) => {
                 placeholder="输入消息..."
                 autoSize={{ minRows: 2, maxRows: 4 }}
             />
+            <Popover
+                content={
+                    <Picker
+                        data={data}
+                        onEmojiSelect={handleEmojiSelect}
+                        locale="zh"
+                        theme="light"
+                        previewPosition="none"
+                    />
+                }
+                trigger="click"
+                placement="topRight"
+            >
+                <Button
+                    icon={<SmileOutlined />}
+                    style={{ marginRight: 8 }}
+                />
+            </Popover>
             <Button 
                 type="primary"
                 icon={<SendOutlined />}
@@ -61,4 +85,4 @@ export default styled(ChatInput)`
     .ant-btn {
         align-self: flex-end;
     }
-`; 
+`;

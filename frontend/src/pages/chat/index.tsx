@@ -1,10 +1,12 @@
-import {FC, useState} from "react";
+import {FC, useEffect, useState} from "react";
 import {styled} from "styled-components";
 import Messagebox, {MessageBoxItem} from "./components/messagebox.tsx";
 import ChatInput from "./components/chatinput.tsx";
 import ContactList, {Contact} from "./components/contactlist.tsx";
 import {message} from "antd";
 import useChatConnection from "../../hooks/useChatConnection.ts";
+import {useRequest} from "alova/client";
+import {getFriends, getUserInfo} from "../../api/user.ts";
 
 enum EventType {
     SendMessage = 1,
@@ -16,8 +18,14 @@ interface Payload<T> {
     data: T
 }
 
+interface User {
+    id: number
+    username: string
+    avatar: string
+}
+
 interface ReceiveMessage {
-    from: number
+    from: User
     content: string
 }
 
@@ -36,6 +44,9 @@ const Index: FC<{ className?: string }> = ({className}) => {
     const [selectedContact, setSelectedContact] = useState<Contact | null>(contacts[0]);
     const [chatHistory, setChatHistory] = useState<ChatHistory>(initialChatHistory);
 
+    let {data: userInfo} = useRequest(getUserInfo);
+
+
     const chatConnection = useChatConnection({
         onOpen: () => {
             messageApi.open({
@@ -50,36 +61,47 @@ const Index: FC<{ className?: string }> = ({className}) => {
             });
         },
         onMessage: (e: MessageEvent<string>) => {
-            console.log(e)
-            messageApi.open({
-                type: 'success',
-                content: e.data,
-            });
             onMessage(e.data)
         },
     })
 
+    // 获取用户的朋友列表
+    let {data: friends} = useRequest(getFriends, []);
+
+    useEffect(() => {
+        if (!friends) {
+            return
+        }
+        setContacts(friends.map(item => {
+            return {
+                id: item.id,
+                name: item.username,
+                avatar: item.avatar,
+                lastMessage: "",
+                unreadCount: 0,
+            }
+        }))
+    }, [friends])
 
     const handleReceiveMessage = (payload: Payload<ReceiveMessage>) => {
         const {from, content} = payload.data;
 
         // Create a new message
         const newMessage: MessageBoxItem = {
-            senderID: from,
-            senderAvatar: "https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png",
-            senderName: "用户" + from,
+            senderID: from.id,
+            senderAvatar: from.avatar,
+            senderName: from.username,
             content,
         };
 
         // Update chat history
         setChatHistory(prev => ({
             ...prev,
-            [from]: [...(prev[from] || []), newMessage]
+            [from.id]: [...(prev[from.id] || []), newMessage]
         }));
-        console.log(contacts)
         setContacts(prev => {
             let newContacts = [...prev]
-            if (!newContacts.find(c => c.id === from)) {
+            if (!newContacts.find(c => c.id === from.id)) {
                 newContacts = [{
                     id: newMessage.senderID,
                     name: newMessage.senderName,
@@ -91,11 +113,11 @@ const Index: FC<{ className?: string }> = ({className}) => {
             }
             newContacts = newContacts.map(contact => {
                 // 更新最新的消息
-                if (contact.id === from) {
+                if (contact.id === from.id) {
                     return {
                         ...contact,
-                        lastMessage: contact.lastMessage,
-                        unreadCount: (!selectedContact || selectedContact!.id !== from) ? (contact.unreadCount || 0) + 1 : contact.unreadCount
+                        lastMessage: newMessage.content,
+                        unreadCount: (!selectedContact || selectedContact!.id !== from.id) ? (contact.unreadCount || 0) + 1 : contact.unreadCount
                     }
                 }
                 return contact
@@ -133,9 +155,9 @@ const Index: FC<{ className?: string }> = ({className}) => {
         }))
 
         const newMessage: MessageBoxItem = {
-            senderID: 0, // Current user
-            senderAvatar: "https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png",
-            senderName: "Me",
+            senderID: userInfo?.id!, // Current user
+            senderAvatar: userInfo?.avatar!,
+            senderName: userInfo?.username!,
             content,
         };
 

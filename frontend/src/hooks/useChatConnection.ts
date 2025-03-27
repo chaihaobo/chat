@@ -26,7 +26,6 @@ const useChatConnection = (actions: ChartConnectionHooks): ChatConnection => {
             actions.onMessage(event)
         };
         ws.onerror = (e) => {
-            console.log(e)
             onConnectFailed(e)
         };
         ws.onopen = (e) => {

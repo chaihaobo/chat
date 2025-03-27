@@ -9,6 +9,7 @@ const Callback: FC = () => {
     const [messageApi, contextHolder] = message.useMessage();
     const [loading, setLoading] = useState(true);
     const code = new URLSearchParams(window.location.search).get('code');
+    const source = new URLSearchParams(window.location.search).get('source');
     // @ts-ignore
     let {userInfo, setUserInfo} = useUserInfo()
     if (!code) {
@@ -24,10 +25,13 @@ const Callback: FC = () => {
                 setUserInfo(userInfo)
                 messageApi.success('登录成功');
                 setTimeout(() => {
-                    navigate('/chat');
-                }, 1000)
+                    if (source) {
+                        navigate(source)
+                        return
+                    }
+                    navigate('/');
+                }, 3000)
             } catch (error) {
-                console.error('Login failed:', error);
                 messageApi.error('登录失败，请重试');
                 setTimeout(() => {
                     navigate('/login');

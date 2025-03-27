@@ -1,6 +1,8 @@
-import { FC } from "react";
-import { List, Avatar } from "antd";
+import {FC} from "react";
+import {Avatar, Button, List} from "antd";
+import {LogoutOutlined} from '@ant-design/icons';
 import styled from "styled-components";
+import useUserInfo from "../../../hooks/useUserInfo";
 
 export interface Contact {
     id: number;
@@ -17,24 +19,38 @@ interface ContactListProps {
     onSelectContact: (contact: Contact) => void;
 }
 
-const ContactList: FC<ContactListProps> = ({ 
-    className, 
-    contacts, 
-    selectedContactId,
-    onSelectContact 
-}) => {
+const ContactList: FC<ContactListProps> = ({
+                                               className,
+                                               contacts,
+                                               selectedContactId,
+                                               onSelectContact
+                                           }) => {
     return (
         <div className={className}>
-            <div className="header">联系人列表</div>
+            <div className="header">
+                <div className="title">联系人列表</div>
+                <div className="user-info">
+                    <Avatar src={useUserInfo().userInfo?.avatar}/>
+                    <span className="username">{useUserInfo().userInfo?.username}</span>
+                    <Button
+                        type="text"
+                        icon={<LogoutOutlined/>}
+                        onClick={() => {
+                            localStorage.removeItem('user_info');
+                            window.location.href = '/login';
+                        }}
+                    />
+                </div>
+            </div>
             <List
                 dataSource={contacts}
                 renderItem={(contact) => (
-                    <List.Item 
+                    <List.Item
                         className={`contact-item ${contact.id === selectedContactId ? 'selected' : ''}`}
                         onClick={() => onSelectContact(contact)}
                     >
                         <List.Item.Meta
-                            avatar={<Avatar src={contact.avatar} />}
+                            avatar={<Avatar src={contact.avatar}/>}
                             title={contact.name}
                             description={contact.lastMessage}
                         />
@@ -59,6 +75,15 @@ export default styled(ContactList)`
         font-size: 16px;
         font-weight: 500;
         border-bottom: 1px solid #e8e8e8;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
     }
 
     .contact-item {
@@ -94,4 +119,4 @@ export default styled(ContactList)`
         white-space: nowrap;
         max-width: 200px;
     }
-`; 
+`;

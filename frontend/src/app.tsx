@@ -6,7 +6,6 @@ import Chat from "./pages/chat";
 import Callback from "./pages/auth/callback.tsx";
 import GlobalStyle from "./globalstyle.ts";
 import {message} from "antd";
-import AuthGuard from "./components/authguard.tsx";
 
 
 const App: FC = () => {
@@ -18,8 +17,8 @@ const App: FC = () => {
                 <Routes>
                     <Route path="/login" element={<Login/>}/>
                     <Route path="/auth/callback" element={<Callback/>}/>
-                    <Route path="/" element={<AuthGuard><Navigate to="/chat" replace/></AuthGuard>}/>
-                    <Route path="/chat" element={<AuthGuard><Chat/></AuthGuard>}/>
+                    <Route path="/" element={<Navigate to="/chat" replace/>}/>
+                    <Route path="/chat" element={<Chat/>}/>
                 </Routes>
             </Layout>
             <GlobalStyle/>
