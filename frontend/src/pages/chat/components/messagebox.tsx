@@ -1,10 +1,11 @@
-import {FC} from "react";
+import {FC, Ref, useEffect, useImperativeHandle, useRef, useState} from "react";
 import {Avatar} from "antd";
 import styled from "styled-components";
 import useUserInfo from "../../../hooks/useUserInfo.ts";
 
 export interface MessageBoxProps {
     items: MessageBoxItem[]
+    ref: Ref<MessageboxRef>
     className?: string
 }
 
@@ -15,10 +16,33 @@ export interface MessageBoxItem {
     content: string
 }
 
-const Messagebox: FC<MessageBoxProps> = ({items, className}) => {
+export interface MessageboxRef {
+    scrollToBottom: () => void
+}
+
+
+const Messagebox: FC<MessageBoxProps> = ({items, className, ref}) => {
     let {userInfo} = useUserInfo();
+    const messageContainerRef = useRef<HTMLDivElement>(null);
+    let [scrollCounter, setScrollCounter] = useState<number>(0);
+
+    const scrollToBottom = () => {
+        if (messageContainerRef.current) {
+            messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+        }
+    };
+    useImperativeHandle(ref, () => {
+        return {
+            scrollToBottom: () => {
+                setScrollCounter(prev => prev + 1);
+            }
+        }
+    })
+    useEffect(() => {
+        scrollToBottom()
+    }, [scrollCounter]);
     return (
-        <div className={className}>
+        <div className={className} ref={messageContainerRef}>
             {items.map((item, index) => (
                 <div
                     key={index}
@@ -33,12 +57,16 @@ const Messagebox: FC<MessageBoxProps> = ({items, className}) => {
             ))}
         </div>
     );
-};
+}
 
 export default styled(Messagebox)`
     display: flex;
     flex-direction: column;
     gap: 16px;
+    height: 100%;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    min-height: 0;
 
     .message-item {
         display: flex;

@@ -47,7 +47,7 @@ const Callback: FC = () => {
     return (
         <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>
             {contextHolder}
-            <Spin spinning={loading} tip="正在处理GitHub授权..."/>
+            <Spin spinning={loading} fullscreen={true} tip="正在处理GitHub授权..."/>
         </div>
     );
 };

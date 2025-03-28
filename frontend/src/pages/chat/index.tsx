@@ -1,12 +1,13 @@
-import {FC, useEffect, useState} from "react";
+import {FC, useEffect, useRef, useState} from "react";
 import {styled} from "styled-components";
-import Messagebox, {MessageBoxItem} from "./components/messagebox.tsx";
+import Messagebox, {MessageBoxItem, MessageboxRef} from "./components/messagebox.tsx";
 import ChatInput from "./components/chatinput.tsx";
 import ContactList, {Contact} from "./components/contactlist.tsx";
 import {message} from "antd";
 import useChatConnection from "../../hooks/useChatConnection.ts";
 import {useRequest} from "alova/client";
 import {getFriends, getUserInfo} from "../../api/user.ts";
+import {getRecentlyMessages} from "../../api/message.ts";
 
 enum EventType {
     SendMessage = 1,
@@ -30,19 +31,13 @@ interface ReceiveMessage {
 }
 
 
-const initialContacts: Contact[] = [];
-
-interface ChatHistory {
-    [contactId: number]: MessageBoxItem[];
-}
-
-const initialChatHistory: ChatHistory = {};
-
 const Index: FC<{ className?: string }> = ({className}) => {
     const [messageApi, contextHolder] = message.useMessage();
-    const [contacts, setContacts] = useState<Contact[]>(initialContacts);
-    const [selectedContact, setSelectedContact] = useState<Contact | null>(contacts[0]);
-    const [chatHistory, setChatHistory] = useState<ChatHistory>(initialChatHistory);
+    const [contacts, setContacts] = useState<Contact[]>([]);
+    const [selectedContact, setSelectedContact] = useState<Contact | null>();
+    const [chatHistory, setChatHistory] = useState<MessageBoxItem[]>([]);
+    let [chatHistoryOffset, _] = useState<number>(0);
+    const messageBoxRef = useRef<MessageboxRef>(null);
 
     let {data: userInfo} = useRequest(getUserInfo);
 
@@ -64,6 +59,14 @@ const Index: FC<{ className?: string }> = ({className}) => {
             onMessage(e.data)
         },
     })
+    useEffect(() => {
+        chatConnection.resetOnMessage(
+            (e: MessageEvent<string>) => {
+                onMessage(e.data)
+            }
+        )
+
+    }, [selectedContact])
 
     // 获取用户的朋友列表
     let {data: friends} = useRequest(getFriends, []);
@@ -95,11 +98,13 @@ const Index: FC<{ className?: string }> = ({className}) => {
         };
 
         // Update chat history
-        setChatHistory(prev => ({
-            ...prev,
-            [from.id]: [...(prev[from.id] || []), newMessage]
-        }));
+        if (selectedContact?.id == from.id) {
+            setChatHistory(prev => ([...prev, newMessage]));
+        }
+
+
         setContacts(prev => {
+            console.log("selectedContact", selectedContact)
             let newContacts = [...prev]
             if (!newContacts.find(c => c.id === from.id)) {
                 newContacts = [{
@@ -133,16 +138,35 @@ const Index: FC<{ className?: string }> = ({className}) => {
     const onMessage = (message: string) => {
         let payload = JSON.parse(message) as Payload<ReceiveMessage>;
         // @ts-ignore
-        eventHandler[payload.event](payload);
+        eventHandler[payload.event].bind(this)(payload);
+    }
+
+    const loadHistoryMessages = async (friend: Contact) => {
+        let recentlyMessagesResponse = await getRecentlyMessages({
+            offset: chatHistoryOffset,
+            limit: 10,
+            friend_user_id: friend.id
+        });
+        let newChatHistory: MessageBoxItem[] = recentlyMessagesResponse.messages.reverse().map(item => (
+            {
+                senderID: item.from,
+                senderAvatar: item.from == userInfo.id ? userInfo.avatar : friend.avatar!,
+                senderName: item.from == userInfo.id ? userInfo.username : friend.name!,
+                content: item.content,
+            }
+        ));
+        setChatHistory([...newChatHistory, ...chatHistory])
     }
 
 
-    const handleSelectContact = (contact: Contact) => {
+    const handleSelectContact = async (contact: Contact) => {
         setSelectedContact(contact);
-        // Clear unread count when selecting a contact
+        // 查询最近的消息
+        await loadHistoryMessages(contact)
         setContacts(contacts.map(c =>
             c.id === contact.id ? {...c, unreadCount: 0} : c
         ));
+        messageBoxRef.current?.scrollToBottom()
     };
 
     const handleSendMessage = (content: string) => {
@@ -161,15 +185,13 @@ const Index: FC<{ className?: string }> = ({className}) => {
             content,
         };
 
-        setChatHistory(prev => ({
-            ...prev,
-            [selectedContact!.id]: [...(prev[selectedContact!.id] || []), newMessage]
-        }));
+        setChatHistory(prev => ([...prev, newMessage]));
 
         // Update last message in contacts
         setContacts(contacts.map(c =>
             c.id === selectedContact!.id ? {...c, lastMessage: content} : c
         ));
+        messageBoxRef.current?.scrollToBottom()
     };
 
     return (
@@ -188,8 +210,8 @@ const Index: FC<{ className?: string }> = ({className}) => {
                             {selectedContact.name}
                         </div>
                         <div className="chat-messages">
-                            <Messagebox
-                                items={chatHistory[selectedContact.id] || []}
+                            <Messagebox ref={messageBoxRef}
+                                        items={chatHistory || []}
                             />
                         </div>
                         <ChatInput onSendMessage={handleSendMessage}/>
@@ -207,7 +229,7 @@ const Index: FC<{ className?: string }> = ({className}) => {
 export default styled(Index)`
     display: flex;
     width: 1280px;
-    height: 860px;
+    height: 500px;
     background-color: #f0f2f5;
     margin: 50px auto 0;
 

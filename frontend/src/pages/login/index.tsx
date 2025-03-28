@@ -16,7 +16,7 @@ const Login: FC<{ className?: string }> = ({className}) => {
     const source = new URLSearchParams(window.location.search).get('source');
 
     const handleGithubLogin = () => {
-        const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${GITHUB_REDIRECT_URI + '?source=' + source}&scope=user`;
+        const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${GITHUB_REDIRECT_URI + '?source=' + (source ?? '/')}&scope=user`;
         window.location.href = githubAuthUrl;
     };
 

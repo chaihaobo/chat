@@ -11,19 +11,31 @@ import (
 type (
 	Repository interface {
 		Save(ctx context.Context, data *entity.Message) error
-		GetRecentlyMessages(ctx context.Context, query *querytypes.RecentlyMessageQuery) (entity.Messages, error)
+		GetRecentlyMessages(ctx context.Context, query *querytypes.RecentlyMessageQuery) (entity.Messages, int64, error)
 	}
 	repository struct {
 		client client.Client
 	}
 )
 
-func (r repository) GetRecentlyMessages(ctx context.Context, query *querytypes.RecentlyMessageQuery) (entity.Messages, error) {
+func (r repository) GetRecentlyMessages(ctx context.Context, query *querytypes.RecentlyMessageQuery) (entity.Messages, int64, error) {
 	result := make(entity.Messages, 0)
-	if err := r.client.DB(ctx).Clauses(query.ToClauses()...).Order("id desc").Offset(query.Offset).Limit(query.Limit).Find(&result).Error; err != nil {
-		return nil, err
+	// 查询所有
+	var total int64
+	if err := r.client.DB(ctx).Model(new(entity.Message)).Clauses(query.ToClauses()...).Count(&total).Error; err != nil {
+		return nil, 0, err
 	}
-	return result, nil
+	if total == 0 {
+		return result, 0, nil
+	}
+	if err := r.client.DB(ctx).Model(new(entity.Message)).
+		Clauses(query.ToClauses()...).
+		Order("id desc").
+		Offset(query.Offset).Limit(query.Limit).
+		Find(&result).Error; err != nil {
+		return nil, 0, err
+	}
+	return result, total, nil
 }
 
 func (r repository) Save(ctx context.Context, user *entity.Message) error {

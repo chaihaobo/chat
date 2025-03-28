@@ -4,6 +4,7 @@ import (
 	"github.com/chaihaobo/chat/application"
 	"github.com/chaihaobo/chat/resource"
 	"github.com/chaihaobo/chat/transport/http/controller/health"
+	"github.com/chaihaobo/chat/transport/http/controller/message"
 	"github.com/chaihaobo/chat/transport/http/controller/user"
 	"github.com/chaihaobo/chat/transport/http/controller/ws"
 )
@@ -13,14 +14,20 @@ type (
 		Health() health.Controller
 		User() user.Controller
 		Ws() ws.Controller
+		Message() message.Controller
 	}
 
 	controllers struct {
-		healthController health.Controller
-		userController   user.Controller
-		wsController     ws.Controller
+		healthController  health.Controller
+		userController    user.Controller
+		wsController      ws.Controller
+		messageController message.Controller
 	}
 )
+
+func (c *controllers) Message() message.Controller {
+	return c.messageController
+}
 
 func (c *controllers) Ws() ws.Controller {
 	return c.wsController
@@ -36,8 +43,9 @@ func (c *controllers) Health() health.Controller {
 
 func New(res resource.Resource, app application.Application) Controller {
 	return &controllers{
-		healthController: health.NewController(res, app),
-		userController:   user.NewController(res, app),
-		wsController:     ws.NewController(res, app),
+		healthController:  health.NewController(res, app),
+		userController:    user.NewController(res, app),
+		wsController:      ws.NewController(res, app),
+		messageController: message.NewController(res, app),
 	}
 }

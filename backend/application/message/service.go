@@ -3,6 +3,7 @@ package message
 import (
 	"context"
 
+	"github.com/chaihaobo/chat/constant"
 	"github.com/chaihaobo/chat/infrastructure"
 	"github.com/chaihaobo/chat/model/dto/message"
 	"github.com/chaihaobo/chat/resource"
@@ -24,10 +25,13 @@ func (s service) GetFriendRecentlyMessages(ctx context.Context, request *message
 	if err := s.res.Validator().Struct(request); err != nil {
 		return nil, err
 	}
-	s.infra.Store().Repository().Message().GetRecentlyMessages()
-
-	//TODO implement me
-	panic("implement me")
+	request.FillDefault()
+	recentlyMessages, total, err := s.infra.Store().Repository().Message().GetRecentlyMessages(ctx, request.ToQuery(ctx))
+	if err != nil {
+		s.res.Logger().Error(ctx, "failed to get recently message", err)
+		return nil, constant.ErrSystemMalfunction
+	}
+	return message.NewGetRecentlyMessagesResponse(request, recentlyMessages, total), nil
 }
 
 func NewService(res resource.Resource, infra infrastructure.Infrastructure) Service {

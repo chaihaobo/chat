@@ -10,6 +10,7 @@ export interface ChartConnectionHooks {
 
 export interface ChatConnection {
     send: (message: string) => void
+    resetOnMessage: (fun: (e: MessageEvent) => void) => void
 }
 
 const useChatConnection = (actions: ChartConnectionHooks): ChatConnection => {
@@ -46,6 +47,9 @@ const useChatConnection = (actions: ChartConnectionHooks): ChatConnection => {
                 return
             }
             wsRef.current.send(message)
+        },
+        resetOnMessage: fun => {
+            wsRef.current!.onmessage = fun
         }
     }
 

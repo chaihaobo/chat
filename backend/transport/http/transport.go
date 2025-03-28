@@ -13,6 +13,7 @@ import (
 
 	"github.com/chaihaobo/chat/application"
 	svcConstant "github.com/chaihaobo/chat/constant"
+	"github.com/chaihaobo/chat/model/dto/message"
 	"github.com/chaihaobo/chat/model/dto/user"
 	"github.com/chaihaobo/chat/resource"
 	"github.com/chaihaobo/chat/transport/http/controller"
@@ -53,6 +54,7 @@ func (t *transport) applyRoutes() {
 	healthController := t.controller.Health()
 	userController := t.controller.User()
 	wsController := t.controller.Ws()
+	messageController := t.controller.Message()
 	router.GET("/health", healthController.Health)
 	router.GET("/ws", wsController.Accept)
 
@@ -62,6 +64,10 @@ func (t *transport) applyRoutes() {
 		userGroup.POST("/login/password", restkit.AdaptToGinHandler(restkit.HandlerFunc[*user.LoginResponse](userController.LoginByPassword)))
 		userGroup.GET("/friends", restkit.AdaptToGinHandler(restkit.HandlerFunc[user.Users](userController.GetUserFriends)))
 		userGroup.GET("/info", restkit.AdaptToGinHandler(restkit.HandlerFunc[*user.User](userController.GetUserInfo)))
+	}
+	messagesGroup := router.Group("/messages")
+	{
+		messagesGroup.GET("/recently", restkit.AdaptToGinHandler(restkit.HandlerFunc[*message.GetRecentlyMessagesResponse](messageController.GetFriendRecentlyMessages)))
 	}
 
 }
