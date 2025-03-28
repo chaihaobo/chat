@@ -2,12 +2,15 @@ package entity
 
 import "encoding/json"
 
-type Message struct {
-	BaseEntity
-	From    uint64 `gorm:"column:from"`
-	To      uint64 `gorm:"column:to"`
-	Content string `gorm:"column:content"`
-}
+type (
+	Message struct {
+		BaseEntity
+		From    uint64 `gorm:"column:from"`
+		To      uint64 `gorm:"column:to"`
+		Content string `gorm:"column:content"`
+	}
+	Messages []*Message
+)
 
 func (s Message) MarshalBinary() ([]byte, error) {
 	return json.Marshal(s)
